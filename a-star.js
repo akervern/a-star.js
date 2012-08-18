@@ -1,6 +1,9 @@
 /** A*.js ... **/
 
-var canvasSize = {width:1200, heigth:600};
+var canvasSize = {
+  width: 1250,
+  heigth: 600
+};
 var table = [
   [0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0],
   [0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0],
@@ -9,9 +12,9 @@ var table = [
   [1, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0],
   [0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 0],
   [0, 0, 0, 3, 0, 0, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 0],
-  [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
-];
+  [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0], ];
 var nodes = [];
+var pathFound = false;
 
 document.addEventListener('DOMContentLoaded', function() {
   initiate();
@@ -53,10 +56,10 @@ function findNode(pt) {
 function autoRecompute(dest) {
   setTimeout(function() {
     if (!computeNodesFor(findNextNode(), dest)) {
-      console.log("not finish ...");
+      //console.log("not finish ...");
       autoRecompute(dest);
     }
-  }, 200);
+  }, 100);
 }
 
 function updateLoop() {
@@ -122,6 +125,22 @@ function draw(ctx) {
   for (var i = 0; i < nodes.length; i++) {
     drawNode(ctx, nodes[i], piece)
   }
+
+  // draw path found
+  if (pathFound) {
+    var node = nodes[nodes.length - 1];
+    do {
+      var origin = node.origin;
+      drawLine(ctx, {
+        x: (node.x * piece.width) + (piece.width / 2),
+        y: (node.y * piece.height) + (piece.height / 2)
+      }, {
+        x: (origin.x * piece.width) + (piece.width / 2),
+        y: (origin.y * piece.height) + (piece.height / 2)
+      }, "red");
+      node = origin;
+    } while (node.origin);
+  }
 }
 
 function findNextNode() {
@@ -136,8 +155,8 @@ function findNextNode() {
       best = node;
     }
   }
-  console.log("NextNode:")
-  console.log(best)
+  //console.log("NextNode:")
+  //console.log(best)
   return best;
 }
 
@@ -156,30 +175,31 @@ function computeNodesFor(pt, destination) {
     y: pt.y
   }]
 
-  console.log("Possible nodes:")
-  console.log(possibleNodes)
+  //console.log("Possible nodes:")
+  //console.log(possibleNodes)
   pt.computed = true;
   for (var i = 0; i < possibleNodes.length; i++) {
     var possibleNode = possibleNodes[i];
+    possibleNode.origin = pt;
 
     // Check if we are in the bounddaries
     if (possibleNode.x < 0 || possibleNode.y >= table.length || possibleNode.x >= table[0].length || possibleNode.y < 0) {
-      console.log("Skiping: " + JSON.stringify(possibleNode))
+      //console.log("Skiping: " + JSON.stringify(possibleNode))
       continue;
     }
 
     //Check if we are winning
     if (possibleNode.x == destination.x && possibleNode.y == destination.y) {
-      return true;
+      nodes.push(possibleNode);
+      return pathFound = true;
     }
 
     // handle end pts
     if (table[possibleNode.y][possibleNode.x] != 0) {
-      console.log("Not empty: " + JSON.stringify(possibleNode))
+      //console.log("Not empty: " + JSON.stringify(possibleNode))
       continue;
     }
 
-    possibleNode.origin = pt;
     possibleNode.cost = 10;
     possibleNode.estimated = Math.ceil(Math.sqrt(Math.pow(10 * (destination.x - possibleNode.x), 2) + Math.pow(10 * (destination.y - possibleNode.y), 2)));
     possibleNode.scoring = possibleNode.cost + possibleNode.estimated;
@@ -241,10 +261,14 @@ function drawPoint(ctx, type, pt) {
   ctx.closePath();
 }
 
-function drawLine(ctx, pt1, pt2) {
+function drawLine(ctx, pt1, pt2, color) {
+  if (!color) {
+    color = "lightgrey"
+  }
+
   ctx.beginPath();
 
-  ctx.strokeStyle = "lightgrey"
+  ctx.strokeStyle = color;
   ctx.moveTo(pt1.x, pt1.y);
   ctx.lineTo(pt2.x, pt2.y);
 
