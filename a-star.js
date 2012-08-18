@@ -163,16 +163,36 @@ function findNextNode() {
 function computeNodesFor(pt, destination) {
   var possibleNodes = [{
     x: pt.x,
-    y: pt.y + 1
+    y: pt.y + 1,
+    cost: 10
   }, {
     x: pt.x,
-    y: pt.y - 1
+    y: pt.y - 1,
+    cost: 10
   }, {
     x: pt.x + 1,
-    y: pt.y
+    y: pt.y,
+    cost: 10
   }, {
     x: pt.x - 1,
-    y: pt.y
+    y: pt.y,
+    cost: 10
+  }, {
+    x: pt.x + 1,
+    y: pt.y + 1,
+    cost: 15
+  }, {
+    x: pt.x + 1,
+    y: pt.y - 1,
+    cost: 15
+  }, {
+    x: pt.x - 1,
+    y: pt.y + 1,
+    cost: 15
+  }, {
+    x: pt.x - 1,
+    y: pt.y - 1,
+    cost: 15
   }]
 
   //console.log("Possible nodes:")
@@ -200,7 +220,6 @@ function computeNodesFor(pt, destination) {
       continue;
     }
 
-    possibleNode.cost = 10;
     possibleNode.estimated = Math.ceil(Math.sqrt(Math.pow(10 * (destination.x - possibleNode.x), 2) + Math.pow(10 * (destination.y - possibleNode.y), 2)));
     possibleNode.scoring = possibleNode.cost + possibleNode.estimated;
 
