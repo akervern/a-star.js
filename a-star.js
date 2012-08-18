@@ -1,12 +1,15 @@
 /** A*.js ... **/
 
-var canvasSize = 500;
+var canvasSize = {width:1200, heigth:600};
 var table = [
-  [0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 3, 0, 0, 0],
-  [1, 0, 0, 3, 0, 0, 0],
-  [0, 0, 0, 3, 3, 3, 0],
-  [0, 0, 0, 0, 0, 0, 3]
+  [0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0],
+  [0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0],
+  [0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0],
+  [0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 3],
+  [1, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0],
+  [0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 0],
+  [0, 0, 0, 3, 0, 0, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 0],
+  [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
 ];
 var nodes = [];
 
@@ -16,12 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initiate() {
   var canvas = document.getElementById('canvas');
-  canvas.height = canvas.width = canvasSize;
+  canvas.height = canvasSize.heigth;
+  canvas.width = canvasSize.width;
   if (canvas.getContext) {
     var ctx = canvas.getContext('2d');
     var dest = {
-      x: 6,
-      y: 3
+      x: 18,
+      y: 4
     }
     table[dest.y][dest.x] = 2;
 
@@ -30,10 +34,20 @@ function initiate() {
 
     computeNodesFor({
       x: 0,
-      y: 2
+      y: 4
     }, dest)
     autoRecompute(dest)
   }
+}
+
+function findNode(pt) {
+  for (var j = 0; j < nodes.length; j++) {
+    var node = nodes[j];
+    if (node.x == pt.x && node.y == pt.y) {
+      return node;
+    }
+  }
+  return null;
 }
 
 function autoRecompute(dest) {
@@ -42,7 +56,7 @@ function autoRecompute(dest) {
       console.log("not finish ...");
       autoRecompute(dest);
     }
-  }, 500);
+  }, 200);
 }
 
 function updateLoop() {
@@ -59,15 +73,15 @@ function drawLoop(ctx) {
 }
 
 function draw(ctx) {
-  ctx.clearRect(0, 0, canvasSize, canvasSize);
+  ctx.clearRect(0, 0, canvasSize.width, canvasSize.heigth);
 
 
   var nbY = table.length;
   var nbX = table[0].length;
 
   var piece = {
-    height: canvasSize / nbY,
-    width: canvasSize / nbX
+    height: canvasSize.heigth / nbY,
+    width: canvasSize.width / nbX
   }
 
   // draw table lines
@@ -77,7 +91,7 @@ function draw(ctx) {
       y: 0
     }, {
       x: i * piece.width,
-      y: canvasSize
+      y: canvasSize.heigth
     })
   }
   for (var i = 1; i < nbY; i++) {
@@ -85,7 +99,7 @@ function draw(ctx) {
       x: 0,
       y: i * piece.height
     }, {
-      x: canvasSize,
+      x: canvasSize.width,
       y: i * piece.height
     })
   }
@@ -171,17 +185,7 @@ function computeNodesFor(pt, destination) {
     possibleNode.scoring = possibleNode.cost + possibleNode.estimated;
 
     //remove duplicate
-    //XXX optimize it ... \o/
-    var found = false;
-    for (var j = 0; j < nodes.length; j++) {
-      var node = nodes[j];
-      if (node.x == possibleNode.x && node.y == possibleNode.y) {
-        found = true;
-        break;
-      }
-    }
-    console.log("Node found: " + found);
-    if (!found) {
+    if (!findNode(possibleNode)) {
       nodes.push(possibleNode);
     }
   }
