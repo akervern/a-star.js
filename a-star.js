@@ -5,8 +5,8 @@ var table = [
   [0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 3, 0, 0, 0],
   [1, 0, 0, 3, 0, 0, 0],
-  [0, 0, 0, 3, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0]
+  [0, 0, 0, 3, 3, 3, 0],
+  [0, 0, 0, 0, 0, 0, 3]
 ];
 var nodes = [];
 
@@ -21,7 +21,7 @@ function initiate() {
     var ctx = canvas.getContext('2d');
     var dest = {
       x: 6,
-      y: 4
+      y: 3
     }
     table[dest.y][dest.x] = 2;
 
@@ -118,7 +118,7 @@ function findNextNode() {
   var best = nodes[0];
   for (var i = 0; i < nodes.length; i++) {
     var node = nodes[i];
-    if (node.scoring <= best.scoring) {
+    if (node.scoring <= best.scoring && !node.computed) {
       best = node;
     }
   }
@@ -144,6 +144,7 @@ function computeNodesFor(pt, destination) {
 
   console.log("Possible nodes:")
   console.log(possibleNodes)
+  pt.computed = true;
   for (var i = 0; i < possibleNodes.length; i++) {
     var possibleNode = possibleNodes[i];
 
@@ -191,7 +192,11 @@ function drawNode(ctx, node, piece) {
   var margin = 5;
   var topX = (node.x * piece.width);
   var topY = (node.y * piece.height);
-  ctx.strokeStyle = "cyan"
+  if (node.computed) {
+    ctx.strokeStyle = "cyan"
+  } else {
+    ctx.strokeStyle = "grey"
+  }
   strokeRect(ctx, {
     x: topX + margin,
     y: topY + margin
